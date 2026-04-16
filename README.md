@@ -33,7 +33,7 @@ pip install -r requirements.txt
 ```
 
 ### Smarter Scheduling
-There are currently four major algorithmic features: 
+There are currently <b> four </b> major algorithmic features: 
 - Sorting by time
 - Multi-criteria filtering
 - Automatic task rescheduling on completion
