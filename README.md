@@ -1,4 +1,4 @@
-# PawPal+ (Module 2 Project)
+# PawPal+
 
 Thsi project builds **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
 
@@ -33,7 +33,13 @@ pip install -r requirements.txt
 ```
 
 ### Smarter Scheduling
-There are currently four major algorithmic features: sorting by time, multi-criteria filtering, automatic task rescheduling on completion, and conflict detection. Sorting by time displays tasks in chronological order in a HH:MM format, regardless of insertion order. Multi-criteria filtering allows a user to sort by completed tasks and by pet. Automatic task rescheduling on completion checks if the task is marked complete and if frequency is "daily" or "weekly", calculates the next occurrence of a task, then creates a new task instance for the next cycle and adds it to a scheduler. Lastly, conflict detection identifies tasks with the same HH:MM and generates a warning message about the conflict.
+There are currently four major algorithmic features: 
+- Sorting by time
+- Multi-criteria filtering
+- Automatic task rescheduling on completion
+- Conflict detection
+
+Sorting by time displays tasks in chronological order in a HH:MM format, regardless of insertion order. Multi-criteria filtering allows a user to sort by completed tasks and by pet. Automatic task rescheduling on completion checks if the task is marked complete and if frequency is "daily" or "weekly", calculates the next occurrence of a task, then creates a new task instance for the next cycle and adds it to a scheduler. Lastly, conflict detection identifies tasks with the same HH:MM and generates a warning message about the conflict.
 
 ## Features
 
