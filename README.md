@@ -29,7 +29,7 @@ This final app now includes:
 
 
 ## Architecture
-![alt text](PawPal_system_diagram.png)
+![alt text](assets/PawPal_system_diagram.png)
 
 ## Getting started
 
