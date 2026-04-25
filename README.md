@@ -22,6 +22,10 @@ This final app:
 - Display the plan clearly (and ideally explain the reasoning)
 - Include tests for the most important scheduling behaviors
 
+
+## Architecture
+![alt text](PawPal_system_diagram.png)
+
 ## Getting started
 
 ### Setup

@@ -1,0 +1,44 @@
+System Design put into Mermaid.live
+
+---
+config:
+  layout: elk
+---
+flowchart TD
+    subgraph Inputs
+        UI([User input / calendar clicks])
+        DOC([pet_care_docs.md])
+    end
+
+    subgraph Processing
+        S([Scheduler / pawpal_system.py])
+        R([Retrieval / ai_retrieval.py])
+        V([Validation / ai_validation.py])
+        P([Proposal generation])
+    end
+
+    subgraph Outputs
+        CAL([Calendar view])
+        SCH([Approved schedule])
+        MSG([Explanation + warnings])
+    end
+
+    subgraph QA
+        H([Human approval])
+        T([Automated tests])
+    end
+
+    UI --> S
+    UI --> P
+    DOC --> R
+    R --> P
+    P --> H
+    H --> S
+    S --> CAL
+    S --> SCH
+    SCH --> V
+    V --> MSG
+    T --> R
+    T --> V
+    T --> S
+    T --> P
