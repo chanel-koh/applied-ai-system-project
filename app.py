@@ -23,17 +23,6 @@ for their pet(s) based on constraints like time, priority, and preferences.
 """
     )
 
-with st.expander("What you need to build", expanded=True):
-    st.markdown(
-        """
-At minimum, your system should:
-- Represent pet care tasks (what needs to happen, how long it takes, priority)
-- Represent the pet and the owner (basic info and preferences)
-- Build a plan/schedule for a day that chooses and orders tasks based on constraints
-- Explain the plan (why each task was chosen and when it happens)
-"""
-    )
-
 st.divider()
 
 st.subheader("Create Owner")
