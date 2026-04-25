@@ -192,11 +192,20 @@ if "owner" in st.session_state and st.session_state.owner.pets:
 else:
     st.info("No pets yet. Add one above.")
 
+if "show_schedule" not in st.session_state:
+    st.session_state.show_schedule = False
+if "pending_conflict_fixes" not in st.session_state:
+    st.session_state.pending_conflict_fixes = []
+
 st.divider()
 
 st.subheader("Build Schedule")
 
-if st.button("Generate schedule"):
+generate_schedule = st.button("Generate schedule")
+if generate_schedule:
+    st.session_state.show_schedule = True
+
+if st.session_state.show_schedule:
     if "owner" in st.session_state:
         owner = st.session_state.owner
         scheduler = owner.scheduler
@@ -214,7 +223,7 @@ if st.button("Generate schedule"):
                 for warning in conflict_warnings:
                     st.warning(warning)
 
-                if "pending_conflict_fixes" not in st.session_state or not st.session_state.pending_conflict_fixes:
+                if not st.session_state.pending_conflict_fixes:
                     st.session_state.pending_conflict_fixes = scheduler.suggest_time_conflict_fixes(sorted_tasks)
 
                 if st.session_state.pending_conflict_fixes:
@@ -227,6 +236,7 @@ if st.button("Generate schedule"):
                     if st.button("Approve proposed fixes", key="approve-conflict-fixes"):
                         applied_messages = scheduler.apply_time_conflict_fixes(st.session_state.pending_conflict_fixes)
                         st.session_state.pending_conflict_fixes = []
+                        st.session_state.show_schedule = True
                         if applied_messages:
                             st.success("Conflict fixes applied.")
                             for msg in applied_messages:
