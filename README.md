@@ -96,8 +96,8 @@ Current coverage includes:
 Confidence level in system reliability based on test results: 5/5
 
 ## Demo
-![alt text](<Add task.png>)
+![alt text](<assets/Add task.png>)
 
-![alt text](<Tasks for each pet.png>)
+![alt text](<assets/Tasks for each pet.png>)
 
-![alt text](<Working scheduling.png>)
+![alt text](<assets/Working scheduling.png>)
