@@ -15,6 +15,7 @@ def load_documentation() -> List[str]:
 
 
 def score_snippet(query: str, snippet: str) -> int:
+    """Score how well a documentation snippet matches the query by shared normalized terms."""
     query_terms = {term for term in query.lower().split() if len(term) > 2}
     snippet_terms = {term for term in snippet.lower().replace("-", " ").split() if len(term) > 2}
     return len(query_terms & snippet_terms)
