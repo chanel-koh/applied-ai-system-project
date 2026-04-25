@@ -103,10 +103,38 @@ if "owner" in st.session_state and st.session_state.owner.pets:
     if "selected_calendar_date" not in st.session_state:
         st.session_state.selected_calendar_date = date.today()
 
+    if "calendar_month" not in st.session_state:
+        st.session_state.calendar_month = date.today().month
+    if "calendar_year" not in st.session_state:
+        st.session_state.calendar_year = date.today().year
+
     st.divider()
     st.subheader("Calendar")
-    current_month = date.today().month
+    month_names = list(calendar.month_name)[1:]
+
+    nav_col1, nav_col2, nav_col3 = st.columns([1, 4, 1])
     current_year = date.today().year
+    with nav_col2:
+        selected_month_name = st.selectbox(
+            "Month",
+            month_names,
+            index=st.session_state.calendar_month - 1,
+            key="calendar_month_select",
+        )
+        selected_year = st.number_input(
+            "Year",
+            min_value=current_year,
+            max_value=current_year + 10,
+            value=st.session_state.calendar_year,
+            step=1,
+            key="calendar_year_input",
+        )
+        st.session_state.calendar_month = month_names.index(selected_month_name) + 1
+        st.session_state.calendar_year = selected_year
+
+    current_month = st.session_state.calendar_month
+    current_year = st.session_state.calendar_year
+    st.write(f"Viewing {calendar.month_name[current_month]} {current_year}")
     st.write(f"Selected date: {st.session_state.selected_calendar_date.strftime('%A, %B %d, %Y')}")
 
     week_days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -120,7 +148,7 @@ if "owner" in st.session_state and st.session_state.owner.pets:
             if day == 0:
                 row_cols[idx].write(" ")
             else:
-                if row_cols[idx].button(str(day), key=f"calendar-day-{current_month}-{day}"):
+                if row_cols[idx].button(str(day), key=f"calendar-day-{current_year}-{current_month}-{day}"):
                     st.session_state.selected_calendar_date = date(current_year, current_month, day)
 
     selected_day = st.session_state.selected_calendar_date
