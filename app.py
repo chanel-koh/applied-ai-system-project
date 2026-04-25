@@ -40,13 +40,13 @@ if st.button("Create Owner"):
 
 st.subheader("Add Pet")
 pet_name = st.text_input("Pet name", value="Mochi")
-species = st.selectbox("Species", ["dog", "cat", "other"])
+breed = st.text_input("Breed", value= "Golden Retriever")
 age = st.number_input("Age", min_value=0, max_value=30, value=1)
 activity_level = st.selectbox("Activity Level", ["low", "medium", "high"], index=1)
 
 if st.button("Add Pet"):
     if "owner" in st.session_state:
-        pet = Pet(name=pet_name, breed=species, age=age, activity_level=activity_level)
+        pet = Pet(name=pet_name, breed=breed, age=age, activity_level=activity_level)
         st.session_state.owner.add_pet(pet)
         st.success(f"Pet {pet_name} added to owner!")
     else:
@@ -213,8 +213,33 @@ if st.button("Generate schedule"):
             if conflict_warnings:
                 for warning in conflict_warnings:
                     st.warning(warning)
+
+                if "pending_conflict_fixes" not in st.session_state or not st.session_state.pending_conflict_fixes:
+                    st.session_state.pending_conflict_fixes = scheduler.suggest_time_conflict_fixes(sorted_tasks)
+
+                if st.session_state.pending_conflict_fixes:
+                    st.info("Suggested fixes are shown below. Approve to update your schedule.")
+                    for fix in st.session_state.pending_conflict_fixes:
+                        st.write(
+                            f"- {fix['pet_name']} ({fix['description']}, priority {fix['priority']}) from {fix['old_time'].strftime('%H:%M')} to {fix['new_time'].strftime('%H:%M')}"
+                        )
+
+                    if st.button("Approve proposed fixes", key="approve-conflict-fixes"):
+                        applied_messages = scheduler.apply_time_conflict_fixes(st.session_state.pending_conflict_fixes)
+                        st.session_state.pending_conflict_fixes = []
+                        if applied_messages:
+                            st.success("Conflict fixes applied.")
+                            for msg in applied_messages:
+                                st.info(msg)
+                        else:
+                            st.warning("No fixes were applied. The conflict may have changed.")
+
+                        todays_tasks = scheduler.get_daily_tasks(today)
+                        sorted_tasks = scheduler.sort_tasks_by_time(todays_tasks)
+                        conflict_warnings = scheduler.detect_time_conflicts()
             else:
                 st.success("No conflicts detected in your current schedule.")
+                st.session_state.pending_conflict_fixes = []
 
             st.caption(f"Showing {len(sorted_tasks)} task(s) for today ({today.strftime('%B %d, %Y')})")
             task_rows = []

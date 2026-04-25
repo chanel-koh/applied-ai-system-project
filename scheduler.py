@@ -172,6 +172,63 @@ class Scheduler:
 
         return created_tasks
 
+    def suggest_time_conflict_fixes(self, tasks: List[Task]) -> List[dict]:
+        """Return proposed time adjustments to resolve exact task conflicts without applying them."""
+        suggestions: List[dict] = []
+        groups = defaultdict(list)
+        priority_value = {"low": 1, "medium": 2, "high": 3}
+
+        for task in tasks:
+            groups[task.time].append(task)
+
+        for time_key, tasks_at_time in groups.items():
+            if len(tasks_at_time) <= 1:
+                continue
+
+            tasks_at_time.sort(key=lambda task: priority_value.get(task.priority.lower(), 2), reverse=True)
+            for offset, task in enumerate(tasks_at_time[1:], start=1):
+                old_time = task.time
+                new_time = old_time + timedelta(minutes=30 * offset)
+                suggestions.append({
+                    "task_index": self.tasks.index(task),
+                    "task_id": id(task),
+                    "pet_name": task.pet.name,
+                    "description": task.description,
+                    "priority": task.priority,
+                    "old_time": old_time,
+                    "new_time": new_time,
+                })
+
+        return suggestions
+
+    def apply_time_conflict_fixes(self, fixes: List[dict]) -> List[str]:
+        """Apply previously suggested conflict fixes and return human-readable messages."""
+        messages: List[str] = []
+
+        for fix in fixes:
+            task = None
+            if fix.get("task_index") is not None and 0 <= fix["task_index"] < len(self.tasks):
+                candidate = self.tasks[fix["task_index"]]
+                if id(candidate) == fix.get("task_id"):
+                    task = candidate
+
+            if task is None:
+                for candidate in self.tasks:
+                    if id(candidate) == fix.get("task_id"):
+                        task = candidate
+                        break
+
+            if task is None:
+                continue
+
+            old_time = task.time
+            task.time = fix["new_time"]
+            messages.append(
+                f"Updated {task.pet.name} ({task.description}) from {old_time.strftime('%H:%M')} to {task.time.strftime('%H:%M')} to resolve the conflict."
+            )
+
+        return messages
+
     def fix_time_conflicts(self) -> List[str]:
         """Resolve exact time conflicts by shifting lower-priority tasks later."""
         messages: List[str] = []
