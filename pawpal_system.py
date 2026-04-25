@@ -60,6 +60,7 @@ class Task:
     description: str
     time: datetime
     frequency: str
+    priority: str = "medium"
     completed: bool = False
     is_recurring: bool = False
     recurrence_interval: Optional[timedelta] = None
@@ -90,8 +91,17 @@ class Task:
         
         return occurrences
 
+@dataclass
+class RecurringTaskProposal:
+    pet_name: str
+    description: str
+    proposed_time: datetime
+    reason: str
+    source_docs: List[str]
+
 class Owner:
     def __init__(self, name: str):
+        """Initialize an owner with a name, pet list, and scheduler."""
         self.name: str = name
         self.pets: List[Pet] = []
         self.scheduler: Scheduler = Scheduler()
@@ -118,6 +128,7 @@ class Owner:
 
 class Scheduler:
     def __init__(self):
+        """Initialize the scheduler with an empty task list."""
         self.tasks: List[Task] = []
 
     def add_task(self, task: Task) -> None:
@@ -228,6 +239,77 @@ class Scheduler:
             # Add the new task to both the pet and scheduler
             task.pet.tasks.append(next_task)
             self.add_task(next_task)
+
+    def generate_recurring_task_proposals(self, owner: Owner, docs: List[str]) -> List[RecurringTaskProposal]:
+        """Generate recurring care task proposals from breed and grooming guidance."""
+        proposals: List[RecurringTaskProposal] = []
+        today = date.today()
+
+        for pet in owner.pets:
+            existing_grooming = any("groom" in t.description.lower() for t in pet.tasks)
+            if pet.breed.lower() == "poodle" and not existing_grooming:
+                source_docs = [snippet for snippet in docs if "poodle" in snippet.lower() or "groom" in snippet.lower()]
+                proposed_time = datetime.combine(today, datetime.min.time()).replace(hour=10, minute=0)
+                if proposed_time.date() < today:
+                    proposed_time += timedelta(days=1)
+
+                proposals.append(RecurringTaskProposal(
+                    pet_name=pet.name,
+                    description="Grooming",
+                    proposed_time=proposed_time,
+                    reason="Poodle grooming every 4 weeks based on care guidance.",
+                    source_docs=source_docs[:2]
+                ))
+
+        return proposals
+
+    def apply_recurring_proposals(self, owner: Owner, proposals: List[RecurringTaskProposal]) -> List[Task]:
+        """Create approved recurring tasks from proposals."""
+        created_tasks: List[Task] = []
+
+        for proposal in proposals:
+            pet = next((p for p in owner.pets if p.name == proposal.pet_name), None)
+            if not pet:
+                continue
+
+            task = Task(
+                pet=pet,
+                description=proposal.description,
+                time=proposal.proposed_time,
+                frequency="monthly",
+                priority="medium",
+                completed=False,
+                is_recurring=True,
+                recurrence_interval=timedelta(days=28)
+            )
+            pet.tasks.append(task)
+            self.add_task(task)
+            created_tasks.append(task)
+
+        return created_tasks
+
+    def fix_time_conflicts(self) -> List[str]:
+        """Resolve exact time conflicts by shifting lower-priority tasks later."""
+        messages: List[str] = []
+        groups = defaultdict(list)
+        priority_value = {"low": 1, "medium": 2, "high": 3}
+
+        for task in self.tasks:
+            groups[task.time].append(task)
+
+        for time_key, tasks_at_time in groups.items():
+            if len(tasks_at_time) <= 1:
+                continue
+
+            tasks_at_time.sort(key=lambda task: priority_value.get(task.priority.lower(), 2), reverse=True)
+            for index, task in enumerate(tasks_at_time[1:], start=1):
+                old_time = task.time
+                task.time = old_time + timedelta(minutes=30 * index)
+                messages.append(
+                    f"Shifted {task.pet.name} ({task.description}) from {old_time.strftime('%H:%M')} to {task.time.strftime('%H:%M')} to resolve conflict."
+                )
+
+        return messages
 
     def get_all_tasks_from_owner_pets(self, owner: Owner) -> List[Task]:
         """Retrieve tasks from an Owner through owner task aggregation."""
