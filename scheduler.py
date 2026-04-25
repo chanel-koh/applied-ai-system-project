@@ -1,130 +1,11 @@
 from __future__ import annotations
-from dataclasses import dataclass, field
+from collections import defaultdict
 from datetime import datetime, date, timedelta
 from typing import List, Optional
-from collections import defaultdict
 
-@dataclass
-class Pet:
-    name: str
-    breed: str
-    age: int
-    activity_level: str
-    medications: List[str] = field(default_factory=list)
-    feeding_schedule: List[str] = field(default_factory=list)
-    walking_schedule: List[str] = field(default_factory=list)
-    tasks: List[Task] = field(default_factory=list)
-
-    def add_medication(self, med: str) -> None:
-        """Add a medication to the pet."""
-        self.medications.append(med)
-
-    def remove_medication(self, med: str) -> None:
-        """Remove a medication from the pet if it exists."""
-        if med in self.medications:
-            self.medications.remove(med)
-
-    def add_feeding(self, feeding: str) -> None:
-        """Add a feeding schedule entry."""
-        self.feeding_schedule.append(feeding)
-
-    def remove_feeding(self, feeding: str) -> None:
-        """Remove a feeding schedule entry if present."""
-        if feeding in self.feeding_schedule:
-            self.feeding_schedule.remove(feeding)
-
-    def add_walking(self, walking: str) -> None:
-        """Add a walking schedule entry."""
-        self.walking_schedule.append(walking)
-
-    def remove_walking(self, walking: str) -> None:
-        """Remove a walking schedule entry if present."""
-        if walking in self.walking_schedule:
-            self.walking_schedule.remove(walking)
-
-    def get_medication_schedule(self) -> List[str]:
-        """Return the medication schedule."""
-        return self.medications
-
-    def get_feeding_schedule(self) -> List[str]:
-        """Return the feeding schedule."""
-        return self.feeding_schedule
-
-    def get_walking_schedule(self) -> List[str]:
-        """Return the walking schedule."""
-        return self.walking_schedule
-
-@dataclass
-class Task:
-    pet: Pet
-    description: str
-    time: datetime
-    frequency: str
-    priority: str = "medium"
-    completed: bool = False
-    is_recurring: bool = False
-    recurrence_interval: Optional[timedelta] = None
-
-    def update_time(self, new_time: datetime) -> None:
-        """Update the scheduled time for the task."""
-        self.time = new_time
-
-    def update_frequency(self, new_frequency: str) -> None:
-        """Update the execution frequency for the task."""
-        self.frequency = new_frequency
-
-    def mark_completed(self) -> None:
-        """Mark this task as completed."""
-        self.completed = True
-
-    def get_next_occurrences(self, start_date: datetime, count: int = 5) -> List[datetime]:
-        """Generate next N occurrence dates for recurring tasks."""
-        if not self.is_recurring or not self.recurrence_interval:
-            return [self.time] if self.time >= start_date else []
-        
-        occurrences = []
-        current = self.time
-        while len(occurrences) < count and current >= start_date:
-            if current >= start_date:
-                occurrences.append(current)
-            current += self.recurrence_interval
-        
-        return occurrences
-
-@dataclass
-class RecurringTaskProposal:
-    pet_name: str
-    description: str
-    proposed_time: datetime
-    reason: str
-    source_docs: List[str]
-
-class Owner:
-    def __init__(self, name: str):
-        """Initialize an owner with a name, pet list, and scheduler."""
-        self.name: str = name
-        self.pets: List[Pet] = []
-        self.scheduler: Scheduler = Scheduler()
-
-    def add_pet(self, pet: Pet) -> None:
-        """Add a pet to the owner."""
-        self.pets.append(pet)
-
-    def remove_pet(self, pet: Pet) -> None:
-        """Remove a pet from the owner if present."""
-        if pet in self.pets:
-            self.pets.remove(pet)
-
-    def list_pets(self) -> List[Pet]:
-        """Return the owner's list of pets."""
-        return self.pets
-
-    def get_all_pet_tasks(self) -> List[Task]:
-        """Collect tasks from all owned pets."""
-        all_tasks = []
-        for pet in self.pets:
-            all_tasks.extend(pet.tasks)
-        return all_tasks
+from task import Task
+from recurring_task_proposal import RecurringTaskProposal
+from pet import Pet
 
 class Scheduler:
     def __init__(self):
@@ -240,7 +121,7 @@ class Scheduler:
             task.pet.tasks.append(next_task)
             self.add_task(next_task)
 
-    def generate_recurring_task_proposals(self, owner: Owner, docs: List[str]) -> List[RecurringTaskProposal]:
+    def generate_recurring_task_proposals(self, owner: "Owner", docs: List[str]) -> List[RecurringTaskProposal]:
         """Generate recurring care task proposals from breed and grooming guidance."""
         proposals: List[RecurringTaskProposal] = []
         today = date.today()
@@ -263,7 +144,7 @@ class Scheduler:
 
         return proposals
 
-    def apply_recurring_proposals(self, owner: Owner, proposals: List[RecurringTaskProposal]) -> List[Task]:
+    def apply_recurring_proposals(self, owner: "Owner", proposals: List[RecurringTaskProposal]) -> List[Task]:
         """Create approved recurring tasks from proposals."""
         created_tasks: List[Task] = []
 
@@ -311,7 +192,7 @@ class Scheduler:
 
         return messages
 
-    def get_all_tasks_from_owner_pets(self, owner: Owner) -> List[Task]:
+    def get_all_tasks_from_owner_pets(self, owner: "Owner") -> List[Task]:
         """Retrieve tasks from an Owner through owner task aggregation."""
         return owner.get_all_pet_tasks()
 
