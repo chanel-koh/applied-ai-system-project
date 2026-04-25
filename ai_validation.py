@@ -1,14 +1,7 @@
-from dataclasses import dataclass
 from typing import List
 
-from pawpal_system import Task
-
-
-@dataclass
-class ValidationResult:
-    passed: bool
-    issues: List[str]
-    notes: List[str]
+from task import Task
+from validation_result import ValidationResult
 
 
 def validate_schedule_explanation(explanation: str, tasks: List[Task], docs: List[str]) -> ValidationResult:
