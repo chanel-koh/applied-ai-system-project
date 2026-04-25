@@ -41,6 +41,18 @@ There are currently four major algorithmic features: sorting by time, multi-crit
 
 ## Features
 
+### RAG-powered schedule guidance
+The app now uses a local pet care reference file (`pet_care_docs.md`) to retrieve relevant guidance about appointments and breed-specific care.
+This helps the assistant explain scheduling decisions and recommend recurring tasks grounded in documented pet care rules.
+
+### Human-approved recurring care proposals
+The app can propose recurring care tasks (for example, a poodle grooming every 4 weeks) and show those proposals for owner approval before creating them.
+After approval, the scheduler places approved tasks in the calendar and resolves conflicts automatically.
+
+### Calendar view with clickable days
+A month-style calendar view lets owners click a day to inspect tasks scheduled for that date.
+This makes it easier to review daily care plans and approve schedule changes with a clear visual interface.
+
 ### Chronological Schedule Sorting
 Tasks are sorted by their `HH:MM` time string using Python's built-in `sorted()` with a key function, ensuring the schedule always displays in chronological order regardless of insertion order. Supports both ascending and descending order.
 
