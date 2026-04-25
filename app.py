@@ -1,7 +1,10 @@
 import calendar
 from datetime import datetime, date, time
 import streamlit as st
-from pawpal_system import Owner, Pet, Task, RecurringTaskProposal
+from owner import Owner
+from pet import Pet
+from task import Task
+from recurring_task_proposal import RecurringTaskProposal
 from ai_retrieval import retrieve_relevant_docs
 from ai_validation import validate_schedule_explanation
 

@@ -1,4 +1,6 @@
-from pawpal_system import Pet, Task, Owner
+from pet import Pet
+from task import Task
+from owner import Owner
 from datetime import datetime, date, timedelta
 
 # Create owner

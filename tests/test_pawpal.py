@@ -1,5 +1,8 @@
 from datetime import datetime, date, timedelta
-from pawpal_system import Pet, Task, Scheduler, Owner
+from pet import Pet
+from task import Task
+from scheduler import Scheduler
+from owner import Owner
 
 
 def test_mark_completed_sets_task_completed():
