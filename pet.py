@@ -1,7 +1,9 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import List
-from task import Task
+from typing import List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from task import Task
 
 @dataclass
 class Pet:

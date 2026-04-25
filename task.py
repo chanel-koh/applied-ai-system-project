@@ -1,8 +1,10 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import List, Optional
-from pet import Pet
+from typing import List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pet import Pet
 
 @dataclass
 class Task:

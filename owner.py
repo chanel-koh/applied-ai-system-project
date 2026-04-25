@@ -1,9 +1,11 @@
 from __future__ import annotations
-from typing import List
+from typing import List, TYPE_CHECKING
 
-from pet import Pet
 from scheduler import Scheduler
-from task import Task
+
+if TYPE_CHECKING:
+    from pet import Pet
+    from task import Task
 
 class Owner:
     def __init__(self, name: str):

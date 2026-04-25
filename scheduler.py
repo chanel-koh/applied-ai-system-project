@@ -1,11 +1,14 @@
 from __future__ import annotations
 from collections import defaultdict
 from datetime import datetime, date, timedelta
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 
 from task import Task
 from recurring_task_proposal import RecurringTaskProposal
-from pet import Pet
+
+if TYPE_CHECKING:
+    from owner import Owner
+    from pet import Pet
 
 class Scheduler:
     def __init__(self):
