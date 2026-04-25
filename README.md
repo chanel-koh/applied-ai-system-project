@@ -1,26 +1,31 @@
-# PawPal+ (Module 2 Project)
+# PawPal+
 
-Thsi project builds **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
+This project builds **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet with agentic assistance.
 
 ## Scenario
 
-A busy pet owner needs help staying consistent with pet care. They want an assistant that can:
+A busy pet owner with one or more pets needs help staying consistent with care while balancing appointments, breed-specific needs, and shifting daily routines. They want an assistant that can:
 
-- Track pet care tasks (walks, feeding, meds, enrichment, grooming, etc.)
-- Consider constraints (time available, priority, owner preferences)
-- Produce a daily plan and explain why it chose that plan
+- Track pet care tasks (walks, feeding, meds, enrichment, grooming, vet visits, etc.)
+- Consider constraints like available time, task priority, pet-specific preferences, and recurrence
+- Recommend recurring care based on breed and pet-care documentation
+- Detect schedule conflicts and suggest or apply lower-priority shifts
+- Produce a daily plan and explain why it matched the pet's needs
 
-This project workflow first designed the system (UML), then implemented the logic in Python, then connected it to Streamlit UI.
+This project workflow first designed the system (UML), then implemented the logic in Python, and finally connected it to a Streamlit UI.
 
 ## What Was Built
 
-This final app:
+This final app now includes:
 
-- Let a user enter basic owner + pet info
-- Let a user add/edit tasks (duration + priority at minimum)
-- Generate a daily schedule/plan based on constraints and priorities
-- Display the plan clearly (and ideally explain the reasoning)
-- Include tests for the most important scheduling behaviors
+- Owner + pet intake so users can manage multiple pets and breed-specific care rules
+- A task editor for adding and updating care tasks with `HH:MM` times, frequency, priority, and recurrence settings
+- A planner that generates a daily schedule sorted chronologically, regardless of insertion order
+- Built-in conflict detection and messaging when tasks share the same scheduled time
+- Automatic next-occurrence creation when daily or weekly tasks are completed
+- Recurring-care proposal generation from local pet care reference docs, with owner approval before task creation
+- A calendar-style view for inspecting tasks by day and approving changes visually
+- Test coverage for scheduling behavior, recurrence, conflict handling, and explanation validation
 
 
 ## Architecture
@@ -37,7 +42,14 @@ pip install -r requirements.txt
 ```
 
 ### Smarter Scheduling
-There are currently four major algorithmic features: sorting by time, multi-criteria filtering, automatic task rescheduling on completion, and conflict detection. Sorting by time displays tasks in chronological order in a HH:MM format, regardless of insertion order. Multi-criteria filtering allows a user to sort by completed tasks and by pet. Automatic task rescheduling on completion checks if the task is marked complete and if frequency is "daily" or "weekly", calculates the next occurrence of a task, then creates a new task instance for the next cycle and adds it to a scheduler. Lastly, conflict detection identifies tasks with the same HH:MM and generates a warning message about the conflict.
+The app now includes a smarter task planner and scheduling engine that does more than just display tasks. Key capabilities include:
+
+- Chronological schedule ordering by `HH:MM` so tasks appear in the order they happen, even if they were entered out of order
+- Automatic recurrence creation for completed `daily` and `weekly` tasks, so the next occurrence is generated without re-entry
+- Time conflict detection for tasks with the same timestamp, producing clear warnings and enabling resolution
+- Lower-priority conflict resolution that can shift tasks forward when high-priority items collide
+- Recurring proposal generation using local pet care guidance, then requiring owner approval before adding recurring tasks
+- Calendar-style day inspection so users can click a date and review that day's scheduled tasks
 
 ## Features
 
@@ -54,32 +66,34 @@ A month-style calendar view lets owners click a day to inspect tasks scheduled f
 This makes it easier to review daily care plans and approve schedule changes with a clear visual interface.
 
 ### Chronological Schedule Sorting
-Tasks are sorted by their `HH:MM` time string using Python's built-in `sorted()` with a key function, ensuring the schedule always displays in chronological order regardless of insertion order. Supports both ascending and descending order.
+Tasks are sorted by their `HH:MM` time string using Python's built-in `sorted()` with a key function, ensuring the schedule always displays in chronological order regardless of insertion order.
 
 ### Time Conflict Detection
-The scheduler groups tasks by their exact timestamp using a `defaultdict`, then scans for groups with more than one task. Any conflicts surface as human-readable warning messages (e.g., `"Time conflict at 2026-03-29 08:00: Mochi (Walk), Luna (Feeding)"`) displayed in the UI before the schedule renders.
+The scheduler groups tasks by their exact timestamp using a `defaultdict`, then scans for groups with more than one task. Any conflicts surface as human-readable warning messages displayed in the UI before the schedule renders.
 
 ### Automatic Task Recurrence on Completion
-Marking a `daily` or `weekly` task complete triggers the scheduler to calculate the next occurrence (`+1 day` or `+7 days`) and automatically create and append a new `Task` instance to both the pet's task list and the scheduler — so the next cycle is always ready without manual re-entry.
+Marking a `daily` or `weekly` task complete triggers the scheduler to calculate the next occurrence (`+1 day` or `+7 days`) and automatically create and append a new `Task` instance to both the pet's task list and the scheduler.
 
-### Recurring Task Expansion
-Tasks can be flagged as recurring with a `recurrence_interval` (`timedelta`). The scheduler expands them into concrete, non-recurring instances across any given date range — useful for viewing a multi-day plan without duplicating source tasks.
+### Recurring Task Proposal Approval
+Breed- and care-document-guided recurring proposals are generated first, and only approved proposals become actual scheduled tasks.
 
-### Multi-Criteria Filtering
-Tasks can be filtered by completion status alone or combined with a pet name, making it easy to view pending tasks for a specific pet.
-
-### Next Task Lookup
-`get_next_task()` returns the single soonest upcoming task using `min()` over the task list by time — an O(n) scan that's simple and correct for the expected dataset size.
+### Conflict Resolution
+Lower-priority tasks can be shifted when a time conflict occurs, preserving higher-priority care while still keeping the schedule feasible.
 
 ### Testing PawPal+
-To run tests, use ```python -m pytest```
+To run tests, use:
 
-Test coverage includes verification on the following:
-    - Sorting correctness: tasks are returned in chronological order
-    - Recurrence logic: marking a daily task complete creates a new task for the following day
-    - Conflict dectection: Scheduler flags duplicate times
+```bash
+python -m pytest
+```
 
-Confidence Level in system reliability based on test results: 5/5
+Current coverage includes:
+- Sorting correctness: `test_sort_tasks_by_time_ascending_order`, `test_sort_tasks_reverse_order`, `test_sort_tasks_ignores_date_sorts_by_time_only`
+- Recurrence logic: `test_complete_daily_task_creates_next_day_occurrence`, `test_complete_weekly_task_creates_next_week_occurrence`, `test_complete_task_frequency_case_insensitive`
+- Conflict detection: `test_detect_time_conflicts_two_tasks_same_time`, `test_detect_time_conflicts_three_tasks_same_time`, `test_fix_time_conflicts_shifts_lower_priority_tasks`
+- Agentic reasoning: `tests/test_agentic.py` covers document retrieval, recurring proposal generation, and schedule explanation validation
+
+Confidence level in system reliability based on test results: 5/5
 
 ## Demo
 ![alt text](<Add task.png>)
