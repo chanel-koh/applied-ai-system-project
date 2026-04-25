@@ -3,6 +3,7 @@ from pawpal_system import Pet, Task, Scheduler, Owner
 
 
 def test_mark_completed_sets_task_completed():
+    """Verify that marking a task completed updates its completed status."""
     pet = Pet(name="Buddy", breed="Golden Retriever", age=4, activity_level="high")
     task = Task(pet=pet, description="Walk the dog", time=datetime.now(), frequency="daily")
     assert task.completed is False
@@ -13,6 +14,7 @@ def test_mark_completed_sets_task_completed():
 
 
 def test_add_task_to_pet_increases_task_count():
+    """Verify adding a task to a pet increases that pet's task count."""
     pet = Pet(name="Whiskers", breed="Tabby", age=2, activity_level="low")
     assert len(pet.tasks) == 0
 
