@@ -1,6 +1,9 @@
-import streamlit as st
-from pawpal_system import Owner, Pet, Task, Scheduler
+import calendar
 from datetime import datetime, date, time
+import streamlit as st
+from pawpal_system import Owner, Pet, Task, RecurringTaskProposal
+from ai_retrieval import retrieve_relevant_docs
+from ai_validation import validate_schedule_explanation
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
@@ -94,7 +97,7 @@ if st.button("Add task"):
     if "owner" in st.session_state and st.session_state.owner.pets:
         selected_pet = next(p for p in st.session_state.owner.pets if p.name == selected_pet_name)
         task_datetime = datetime.combine(task_date, task_time)
-        task = Task(pet=selected_pet, description=task_title, time=task_datetime, frequency=frequency)
+        task = Task(pet=selected_pet, description=task_title, time=task_datetime, frequency=frequency, priority=priority)
         selected_pet.tasks.append(task)
         st.session_state.owner.scheduler.add_task(task)
         st.success(f"Task added for {selected_pet_name} on {task_date.strftime('%b %d')} at {task_time.strftime('%H:%M')}!")
@@ -105,10 +108,69 @@ if "owner" in st.session_state and st.session_state.owner.pets:
     for pet in st.session_state.owner.pets:
         if pet.tasks:
             st.write(f"Tasks for {pet.name}:")
-            task_data = [{"description": t.description, "time": t.time.strftime("%Y-%m-%d %H:%M"), "frequency": t.frequency, "completed": t.completed} for t in pet.tasks]
+            task_data = [{"description": t.description, "time": t.time.strftime("%Y-%m-%d %H:%M"), "frequency": t.frequency, "priority": t.priority, "completed": t.completed} for t in pet.tasks]
             st.table(task_data)
         else:
             st.info(f"No tasks for {pet.name} yet.")
+
+    if "selected_calendar_date" not in st.session_state:
+        st.session_state.selected_calendar_date = date.today()
+
+    st.divider()
+    st.subheader("Calendar")
+    current_month = date.today().month
+    current_year = date.today().year
+    st.write(f"Selected date: {st.session_state.selected_calendar_date.strftime('%A, %B %d, %Y')}")
+
+    week_days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    header_cols = st.columns(7)
+    for idx, day_name in enumerate(week_days):
+        header_cols[idx].markdown(f"**{day_name}**")
+
+    for week in calendar.monthcalendar(current_year, current_month):
+        row_cols = st.columns(7)
+        for idx, day in enumerate(week):
+            if day == 0:
+                row_cols[idx].write(" ")
+            else:
+                if row_cols[idx].button(str(day), key=f"calendar-day-{current_month}-{day}"):
+                    st.session_state.selected_calendar_date = date(current_year, current_month, day)
+
+    selected_day = st.session_state.selected_calendar_date
+    selected_day_tasks = st.session_state.owner.scheduler.get_daily_tasks(selected_day)
+    st.write(f"Tasks on {selected_day.strftime('%B %d, %Y')}:")
+    if selected_day_tasks:
+        day_rows = [{"Time": t.time.strftime("%H:%M"), "Pet": t.pet.name, "Task": t.description, "Priority": t.priority} for t in selected_day_tasks]
+        st.table(day_rows)
+    else:
+        st.info("No tasks scheduled for this day.")
+
+    st.divider()
+    st.subheader("Recurring Care Proposals")
+    if st.button("Propose recurring care tasks"):
+        docs = retrieve_relevant_docs("recommend recurring care tasks", top_k=5)
+        proposals = st.session_state.owner.scheduler.generate_recurring_task_proposals(st.session_state.owner, docs)
+        st.session_state.pending_proposals = [proposal.__dict__ for proposal in proposals]
+
+    pending_proposals = st.session_state.get("pending_proposals", [])
+    if pending_proposals:
+        st.write("Proposed recurring tasks:")
+        for proposal in pending_proposals:
+            st.markdown(f"**{proposal['pet_name']}** — {proposal['description']} at {proposal['proposed_time'].strftime('%Y-%m-%d %H:%M')}")
+            st.write(proposal['reason'])
+            if proposal['source_docs']:
+                st.write("Source docs:")
+                for doc in proposal['source_docs']:
+                    st.write(f"- {doc}")
+
+        if st.button("Approve all proposals"):
+            approved = [RecurringTaskProposal(**proposal) for proposal in pending_proposals]
+            created_tasks = st.session_state.owner.scheduler.apply_recurring_proposals(st.session_state.owner, approved)
+            fixes = st.session_state.owner.scheduler.fix_time_conflicts()
+            st.success(f"Added {len(created_tasks)} task(s) after approval.")
+            for message in fixes:
+                st.info(message)
+            st.session_state.pending_proposals = []
 else:
     st.info("No pets yet. Add one above.")
 
@@ -144,11 +206,37 @@ if st.button("Generate schedule"):
                     "Pet": task.pet.name,
                     "Task": task.description,
                     "Frequency": task.frequency,
+                    "Priority": task.priority,
                     "Completed": "✅" if task.completed else "❌"
                 })
 
             st.subheader("Sorted Schedule")
             st.table(task_rows)
+
+            explanation = "Today’s schedule includes " + ", ".join(
+                f"{task.description} for {task.pet.name} at {task.time.strftime('%H:%M')}" for task in sorted_tasks
+            ) + "."
+            docs = retrieve_relevant_docs("explain today's pet care schedule", top_k=3)
+            validation = validate_schedule_explanation(explanation, sorted_tasks, docs)
+
+            st.subheader("Schedule Explanation")
+            st.write(explanation)
+
+            st.subheader("Validation")
+            if validation.passed:
+                st.success("AI explanation validation passed.")
+            else:
+                for issue in validation.issues:
+                    st.error(issue)
+            for note in validation.notes:
+                st.info(note)
+
+            st.subheader("Retrieved Reference Docs")
+            if docs:
+                for doc in docs:
+                    st.write(f"- {doc}")
+            else:
+                st.write("No reference docs found.")
 
             next_task = scheduler.get_next_task()
             if next_task:
