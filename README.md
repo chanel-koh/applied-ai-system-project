@@ -41,6 +41,9 @@ This app has four main components:
 3. Processing: The AI gathers information from the reference doc to make suggestions, then reflects on all suggestions it makes. The system also detects if there are any schedule conflicts and reports this to the user. 
 4. Outputs: calendar view with scheduled tasks, a list of the daily schedule, and explanations when the AI offers scheduling suggestions.
 
+## Design Decisions
+Whether a person has one or multiple pets, it's difficult to keep track of tasks for pet care in addition to other tasks throughout the day. The aim of PawPal+ is to simplify this by integrating features such as task suggestions and conflict detection, then alerting the user. These two features were made to take the mental load off of users. Additionally, a calendar view was implemented so users can plan tasks in advance or set recurring tasks, like grooming appointments. Human validation was also put at multiple steps (approving conflict resolution of task suggestions) to ensure that the user always knows what's going on with their pet's schedule and why. The main tradeoff I considered is that not requiring human validation would probably be faster for the user, but they would be less in control if a siggestion is inaccurate.
+
 ## Getting started
 
 ### Setup and Running
@@ -104,20 +107,24 @@ Current coverage includes:
 - Conflict detection: `test_detect_time_conflicts_two_tasks_same_time`, `test_detect_time_conflicts_three_tasks_same_time`, `test_fix_time_conflicts_shifts_lower_priority_tasks`
 - Agentic reasoning: `tests/test_agentic.py` covers document retrieval, recurring proposal generation, and schedule explanation validation
 
-Confidence level in system reliability based on test results: 5/5
+Summary:
+Unit tests for sorting and conflict detectionw ere reliable and gave fast feedback. Agentic tests in 'test_agentic.py' validated the retrieval pipeline, confirming that explanations were checked against reference docs. What didn't work very well was keyword-based retrieval in 'ai_retrieval.py': synonyms like 'coat maintenance' vs. 'grooming' aren't picked up, and relevant docs weren't always surfaced as a result. I learned that separating retrieval, validation, and scheduling into their own modules made each piece easy to test in isolation. 
 
 ## Sample Interactions
 Example 1: Adding pet and pet list
-![alt text](<Add pet.png>)
+![alt text](<assets/Add pet.png>)
 
 Example 2: RAG-powered schedule suggestions based on internal reference doc, 'pet_care_docs.md'
-![alt text](<AI-assisted scheduling.png>)
+![alt text](<assets/AI-assisted scheduling.png>)
 
 Example 3: Agentic reasoning and reflection
-![alt text](<Agentic reasoning and reflection.png>)
+![alt text](<assets/Agentic reasoning and reflection.png>)
 
 Example 4: Calendar view with clickable days
-![alt text](<Calendar view.png>)
+![alt text](<assets/Calendar view.png>)
 
 Example 5: Conflict detection and fix suggestions
-![alt text](<Conflict detection.png>)
+![alt text](<assets/Conflict detection.png>)
+
+## Reflection
+This project taught me that positive, action-oriented prompts were much more effective than telling the LLM what not to do. For example, when changing the color of the UI, saying a prompt such as 'make the background color of input boxes white" yeilded the desired result much more than 'don't use black for the background color." I also learned that implementing a way for the AI agent in the application to check itself was useful in notifying the user if it had any uncertainty about its recommendations. In order to investigate a bug before simply sending the LLM to fix it, it is useful to ask something in the format of "I see that [description of bug] is happening at [location / when a certain action is made], where in the code is this stemming from?"
