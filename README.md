@@ -27,18 +27,29 @@ This final app now includes:
 - A calendar-style view for inspecting tasks by day and approving changes visually
 - Test coverage for scheduling behavior, recurrence, conflict handling, and explanation validation
 
+Note: This app was an extension of the CodePath AI110 Module 2 PawPal+ app which had the same goal as this extended app included the following behaviors:
+- Let a user enter basic owner + pet info
+- Let a user add tasks (duration + priority)
+- Generate a daily schedule/plan based on priorities
 
 ## Architecture
 ![alt text](assets/PawPal_system_diagram.png)
 
+This app has four main components: 
+1. QA: human approval and automated testing.
+2. Inputs: user input for tasks and a reference doc for agentic scheduling actions
+3. Processing: The AI gathers information from the reference doc to make suggestions, then reflects on all suggestions it makes. The system also detects if there are any schedule conflicts and reports this to the user. 
+4. Outputs: calendar view with scheduled tasks, a list of the daily schedule, and explanations when the AI offers scheduling suggestions.
+
 ## Getting started
 
-### Setup
+### Setup and Running
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+streamlit run app.py
 ```
 
 ### Smarter Scheduling
