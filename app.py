@@ -41,9 +41,10 @@ if "calendar_year" not in st.session_state:
 
 st.divider()
 
-home_tab, schedule_tab, ai_tab = st.tabs(["Home", "Schedule", "AI Assistant"])
+st.sidebar.title("Menu")
+selected_tab = st.sidebar.radio("Navigate", ["Home", "Schedule", "AI Assistant"], index=0)
 
-with home_tab:
+if selected_tab == "Home":
     st.subheader("Create Owner")
     owner_name = st.text_input("Owner name", value="Jordan")
 
@@ -79,7 +80,7 @@ with home_tab:
     else:
         st.info("Create an owner to get started.")
 
-with schedule_tab:
+elif selected_tab == "Schedule":
     st.subheader("Tasks")
 
     selected_pet_name = None
@@ -183,7 +184,7 @@ with schedule_tab:
     else:
         st.info("Create an owner and add a pet in the Home tab to use the scheduler.")
 
-with ai_tab:
+else:
     st.subheader("Recurring Care Proposals")
     if st.button("Propose recurring care tasks", key="propose-recurring"):
         docs = retrieve_relevant_docs("recommend recurring care tasks", top_k=5)
