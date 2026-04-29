@@ -106,9 +106,18 @@ Current coverage includes:
 
 Confidence level in system reliability based on test results: 5/5
 
-## Demo
-![alt text](<assets/Add task.png>)
+## Sample Interactions
+Example 1: Adding pet and pet list
+![alt text](<Add pet.png>)
 
-![alt text](<assets/Tasks for each pet.png>)
+Example 2: RAG-powered schedule suggestions based on internal reference doc, 'pet_care_docs.md'
+![alt text](<AI-assisted scheduling.png>)
 
-![alt text](<assets/Working scheduling.png>)
+Example 3: Agentic reasoning and reflection
+![alt text](<Agentic reasoning and reflection.png>)
+
+Example 4: Calendar view with clickable days
+![alt text](<Calendar view.png>)
+
+Example 5: Conflict detection and fix suggestions
+![alt text](<Conflict detection.png>)
