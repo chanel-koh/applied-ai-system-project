@@ -18,6 +18,20 @@ def test_retrieve_relevant_docs_prefers_grooming_terms():
     assert any("groom" in snippet.lower() or "poodle" in snippet.lower() for snippet in docs)
 
 
+def test_retrieve_relevant_docs_prefers_appointment_guidance():
+    """Verify appointment-related queries return appointment guidance snippets."""
+    docs = retrieve_relevant_docs("schedule a vet appointment")
+    assert len(docs) > 0
+    assert any("appointment" in snippet.lower() for snippet in docs)
+
+
+def test_load_documentation_includes_section_labels():
+    """Ensure the loader preserves section context to support RAG-based search."""
+    docs = load_documentation()
+    assert any(doc.lower().startswith("grooming:") for doc in docs)
+    assert any(doc.lower().startswith("appointment guidance:") for doc in docs)
+
+
 def test_validate_schedule_explanation_detects_missing_task_reference():
     """Confirm validation flags explanations that omit a specific scheduled task."""
     explanation = "This schedule is based on general pet care recommendations."
