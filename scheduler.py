@@ -131,17 +131,36 @@ class Scheduler:
 
         for pet in owner.pets:
             existing_grooming = any("groom" in t.description.lower() for t in pet.tasks)
-            if pet.breed.lower() == "poodle" and not existing_grooming:
-                source_docs = [snippet for snippet in docs if "poodle" in snippet.lower() or "groom" in snippet.lower()]
+            if not existing_grooming:
+                keywords = {"groom", pet.breed.lower(), pet.activity_level.lower()}
+                if pet.age < 2:
+                    keywords.add("puppy")
+                elif pet.age > 7:
+                    keywords.add("senior")
+
+                source_docs = [snippet for snippet in docs if any(term in snippet.lower() for term in keywords)]
+                if not source_docs:
+                    source_docs = [snippet for snippet in docs if "groom" in snippet.lower()]
+                if not source_docs:
+                    source_docs = docs[:2]
+
                 proposed_time = datetime.combine(today, datetime.min.time()).replace(hour=10, minute=0)
+                if pet.activity_level.lower() == "high":
+                    proposed_time = proposed_time.replace(hour=9)
+                elif pet.activity_level.lower() == "low":
+                    proposed_time = proposed_time.replace(hour=11)
                 if proposed_time.date() < today:
                     proposed_time += timedelta(days=1)
 
+                age_context = "puppy" if pet.age < 2 else "senior" if pet.age > 7 else "adult pet"
                 proposals.append(RecurringTaskProposal(
                     pet_name=pet.name,
                     description="Grooming",
                     proposed_time=proposed_time,
-                    reason="Poodle grooming every 4 weeks based on care guidance.",
+                    reason=(
+                        f"{pet.breed} ({age_context}) with {pet.activity_level} activity should have regular grooming "
+                        "every 4 weeks based on care guidance."
+                    ),
                     source_docs=source_docs[:2]
                 ))
 

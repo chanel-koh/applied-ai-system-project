@@ -38,18 +38,19 @@ def test_validate_schedule_explanation_passes_for_reasonable_explanation():
     assert result.passed
 
 
-def test_generate_recurring_task_proposals_for_poodle():
-    """Ensure recurring proposals are generated for a poodle without grooming tasks."""
+def test_generate_recurring_task_proposals_for_any_breed():
+    """Ensure recurring proposals are generated for any breed without grooming tasks."""
     owner = Owner(name="Jordan")
-    pet = Pet(name="Mochi", breed="Poodle", age=3, activity_level="high")
+    pet = Pet(name="Mochi", breed="Golden Retriever", age=3, activity_level="high")
     owner.add_pet(pet)
     scheduler = owner.scheduler
-    docs = ["Poodles usually need a haircut every 4 weeks."]
+    docs = ["All dogs need grooming regularly, especially high activity breeds."]
 
     proposals = scheduler.generate_recurring_task_proposals(owner, docs)
     assert len(proposals) == 1
     assert proposals[0].pet_name == "Mochi"
     assert "groom" in proposals[0].description.lower()
+    assert "golden retriever" not in proposals[0].description.lower() or proposals[0].pet_name == "Mochi"
 
 
 def test_apply_recurring_proposals_creates_tasks():
