@@ -107,9 +107,6 @@ Current coverage includes:
 - Conflict detection: `test_detect_time_conflicts_two_tasks_same_time`, `test_detect_time_conflicts_three_tasks_same_time`, `test_fix_time_conflicts_shifts_lower_priority_tasks`
 - Agentic reasoning: `tests/test_agentic.py` covers document retrieval, recurring proposal generation, and schedule explanation validation
 
-Summary:
-Unit tests for sorting and conflict detectionw ere reliable and gave fast feedback. Agentic tests in 'test_agentic.py' validated the retrieval pipeline, confirming that explanations were checked against reference docs. What didn't work very well was keyword-based retrieval in 'ai_retrieval.py': synonyms like 'coat maintenance' vs. 'grooming' aren't picked up, and relevant docs weren't always surfaced as a result. I learned that separating retrieval, validation, and scheduling into their own modules made each piece easy to test in isolation. 
-
 ## Sample Interactions
 Example 1: Adding pet and pet list
 ![alt text](<assets/Add pet.png>)
@@ -126,11 +123,3 @@ Example 4: Calendar view with clickable days
 Example 5: Conflict detection and fix suggestions
 ![alt text](<assets/Conflict detection.png>)
 
-## Reflection
-This project taught me that positive, action-oriented prompts were much more effective than telling the LLM what not to do. For example, when changing the color of the UI, saying a prompt such as 'make the background color of input boxes white" yeilded the desired result much more than 'don't use black for the background color." I also learned that implementing a way for the AI agent in the application to check itself was useful in notifying the user if it had any uncertainty about its recommendations. In order to investigate a bug before simply sending the LLM to fix it, it is useful to ask something in the format of "I see that [description of bug] is happening at [location / when a certain action is made], where in the code is this stemming from?"
-
-## Reliability and Evaluation
-- Limitations and Bias: the system's keyword-based retrieval as a built-in bias towards breeds and care terms that appear in 'pet_care_docs.md', such as poodles and puppies. This means less documented breeds receive less specific and/or less accurate care proposals. 
-- Risk of misuse: misuse risk is low given the pet care domain and because the RAG specifically references internal docs, further constraining output. However, a user could approve a poor task proposal, putting the task on their schedule and giving subpar care to their pet. 
-- Surprises while testing AI reliability: Even when a pet breed appeared in the internal referece doc, the AI suggested opted for a more general explanation, such as "Enrichment tasks can be scheduled around regular feeding or walking routines" rather than a higher match in the doc such as "Poodles should be groomed every 4 weeks." This is likely due to an error in the retrieval ranking system.
-- In terms of AI collaboration, Copilot was mainly used for refactoring code and adding RAG functionality, while Claude was used for brainstorming in summarizing newly added features. An instance where Copilot gave a helpful suggestion is when it explained that since Streamlit was putting an automatic UI wrapper on dropdown fields, an explicit override had to be included in the CSS style part of the app code. An unhelpful suggestion it made was when it suggested to only make task suggestions when the pet breed was poodle.
