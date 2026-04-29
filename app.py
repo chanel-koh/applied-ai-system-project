@@ -8,21 +8,122 @@ from recurring_task_proposal import RecurringTaskProposal
 from ai_retrieval import retrieve_relevant_docs
 from ai_validation import validate_schedule_explanation
 
-st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
+st.set_page_config(page_title="PawPal+ — Care with Joy", page_icon="🐾", layout="centered")
+
+st.markdown(
+    """
+<style>
+    body, div[data-testid="stAppViewContainer"], section[data-testid="stSidebar"], div[data-testid="stMain"], main, .stMarkdown, .stText, .stAlert {
+        color: #0d3a7d !important;
+    }
+    section[data-testid="stMain"] label,
+    section[data-testid="stSidebar"] label,
+    .stTextInput label,
+    .stNumberInput label,
+    .stSelectbox label,
+    .stDateInput label,
+    .stTimeInput label {
+        color: #0d3a7d !important;
+    }
+    header, div[data-testid="stToolbar"], div[data-testid="stAppViewContainer"] > header, section[data-testid="stMain"] > header {
+        background-color: #0d3a7d !important;
+        color: #ffffff !important;
+    }
+    div[data-testid="stAppViewContainer"] {
+        background: linear-gradient(180deg, #ffffff 0%, #e6f0ff 45%, #d8e8ff 100%);
+    }
+    section[data-testid="stSidebar"] {
+        width: 250px;
+        max-width: 250px;
+        min-width: 220px;
+        background: linear-gradient(180deg, #f8fbff 0%, #e9f3ff 100%);
+        border-right: 1px solid rgba(148, 176, 213, 0.35);
+        color: #0d3a7d !important;
+    }
+    section[data-testid="stSidebar"] * {
+        color: #0d3a7d !important;
+    }
+    div[data-testid="stMain"], main {
+        background: transparent;
+    }
+    div.stButton>button, div[data-testid="stSidebar"] button {
+        background: linear-gradient(135deg, #4f7cff, #7fb8ff) !important;
+        color: #ffffff !important;
+        border: none !important;
+        box-shadow: 0 8px 18px rgba(79, 124, 255, 0.18);
+        border-radius: 16px !important;
+    }
+    button[data-baseweb="button"] {
+        font-weight: 600;
+    }
+    input, textarea, select,
+    .stTextInput>div>div>input,
+    .stNumberInput>div>input,
+    .stDateInput>div>div>input,
+    .stTimeInput>div>div>input,
+    .stSelectbox>div>div>div>div {
+        border-radius: 0px !important;
+        border: 1px solid #ffffff !important;
+        color: #0d3a7d !important;
+        background-color: #ffffff !important;
+    }
+    
+    input::placeholder, textarea::placeholder {
+        color: rgba(13, 58, 125, 0.5) !important;
+    }
+    .stTable td, .stTable th,
+    section[data-testid="stMain"] table td,
+    section[data-testid="stMain"] table th {
+        color: #0d3a7d !important;
+    }
+    .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+        color: #0f172a !important;
+    }
+    .stAlert {
+        border-left: 4px solid #4f7cff;
+    }
+    .stSelectbox > div > div {
+        border: 1px solid #ffffff !important;
+        background-color: #ffffff !important;
+    }
+    [data-baseweb="select"] [role="listbox"],
+    [data-baseweb="popover"] ul {
+        background-color: #ffffff !important;
+        color: #0d3a7d !important;
+    }
+    [data-baseweb="select"] [role="option"],
+    [data-baseweb="menu"] li {
+        color: #0d3a7d !important;
+    }
+    div[data-testid="stSelectbox"] *:not(svg) {
+        color: #0d3a7d !important;
+    }
+    div[data-testid="stSelectbox"] svg,
+    div[data-testid="stSelectbox"] svg path {
+        fill: #0d3a7d !important;
+        stroke: none !important;
+        opacity: 1 !important;
+    }
+</style>
+""",
+    unsafe_allow_html=True,
+)
 
 st.title("🐾 PawPal+")
 
 st.markdown(
     """
-Welcome to the PawPal+ app.
+Welcome to **PawPal+**, your joyful pet care companion.
+
+Create smart routines filled with thoughtful care for every furry friend.
 """
 )
 
 with st.expander("Scenario", expanded=True):
     st.markdown(
         """
-**PawPal+** is a pet care planning assistant. It helps a pet owner plan care tasks
-for their pet(s) based on constraints like time, priority, and preferences.
+**PawPal+** is a loving pet care planner designed to help busy owners build happy, healthy routines.
+It balances priorities, timing, and pet preferences so every walk, meal, and moment feels intentional.
 """
     )
 
@@ -41,19 +142,19 @@ if "calendar_year" not in st.session_state:
 
 st.divider()
 
-st.sidebar.title("Menu")
+st.sidebar.title("PawPal+ Menu")
 selected_tab = st.sidebar.radio("Navigate", ["Home", "Schedule", "AI Assistant"], index=0)
 
 if selected_tab == "Home":
-    st.subheader("Create Owner")
+    st.subheader("Create Your Care Crew")
     owner_name = st.text_input("Owner name", value="Jordan")
 
     if st.button("Create Owner", key="create-owner"):
         if "owner" not in st.session_state:
             st.session_state.owner = Owner(owner_name)
-            st.success("Owner created and stored in session state!")
+            st.success("Yay! Owner created — your pet care journey starts now.")
         else:
-            st.info("Owner already exists in session state.")
+            st.info("You already have an owner saved. Ready for more pet magic?")
 
     st.subheader("Add Pet")
     pet_name = st.text_input("Pet name", value="Mochi")
@@ -65,23 +166,23 @@ if selected_tab == "Home":
         if "owner" in st.session_state:
             pet = Pet(name=pet_name, breed=breed, age=age, activity_level=activity_level)
             st.session_state.owner.add_pet(pet)
-            st.success(f"Pet {pet_name} added to owner!")
+            st.success(f"Awesome! {pet_name} is now part of your care family.")
         else:
-            st.error("Create owner first.")
+            st.error("Please create an owner first so your pet has a home.")
 
     if "owner" in st.session_state:
-        st.write(f"Stored Owner: {st.session_state.owner.name}")
+        st.write(f"Saved Owner: {st.session_state.owner.name}")
         if st.session_state.owner.pets:
-            st.write("Pets:")
+            st.write("Pets in your care:")
             for pet in st.session_state.owner.pets:
                 st.write(f"- {pet.name} ({pet.breed}, age {pet.age}, activity {pet.activity_level})")
         else:
-            st.info("No pets added yet.")
+            st.info("No pets yet — add a furry friend to begin the adventure.")
     else:
-        st.info("Create an owner to get started.")
+        st.info("Create an owner to get started and unlock joyful pet planning.")
 
 elif selected_tab == "Schedule":
-    st.subheader("Tasks")
+    st.subheader("Design a Happy Care Plan")
 
     selected_pet_name = None
     if "owner" in st.session_state and st.session_state.owner.pets:
@@ -90,7 +191,7 @@ elif selected_tab == "Schedule":
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        task_title = st.text_input("Task title", value="Morning walk")
+        task_title = st.text_input("Task title", value="Morning adventure")
     with col2:
         duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
     with col3:
@@ -104,16 +205,16 @@ elif selected_tab == "Schedule":
     with col6:
         frequency = st.selectbox("Frequency", ["once", "daily", "weekly"], index=0)
 
-    if st.button("Add task", key="add-task"):
+    if st.button("Add care moment", key="add-task"):
         if "owner" in st.session_state and st.session_state.owner.pets:
             selected_pet = next(p for p in st.session_state.owner.pets if p.name == selected_pet_name)
             task_datetime = datetime.combine(task_date, task_time)
             task = Task(pet=selected_pet, description=task_title, time=task_datetime, frequency=frequency, priority=priority)
             selected_pet.tasks.append(task)
             st.session_state.owner.scheduler.add_task(task)
-            st.success(f"Task added for {selected_pet_name} on {task_date.strftime('%b %d')} at {task_time.strftime('%H:%M')}!")
+            st.success(f"Task added for {selected_pet_name}! Your pet's day just got brighter.")
         else:
-            st.error("Create owner and add a pet first.")
+            st.error("Create an owner and add a pet first so your care plan can begin.")
 
     if "owner" in st.session_state and st.session_state.owner.pets:
         for pet in st.session_state.owner.pets:
@@ -128,7 +229,7 @@ elif selected_tab == "Schedule":
                 } for t in pet.tasks]
                 st.table(task_data)
             else:
-                st.info(f"No tasks for {pet.name} yet.")
+                st.info(f"No tasks for {pet.name} yet — add one to create a caring routine.")
 
         st.divider()
         st.subheader("Calendar")
@@ -185,15 +286,15 @@ elif selected_tab == "Schedule":
         st.info("Create an owner and add a pet in the Home tab to use the scheduler.")
 
 else:
-    st.subheader("Recurring Care Proposals")
-    if st.button("Propose recurring care tasks", key="propose-recurring"):
+    st.subheader("Smart Care Suggestions")
+    if st.button("Inspire recurring care", key="propose-recurring"):
         docs = retrieve_relevant_docs("recommend recurring care tasks", top_k=5)
         proposals = st.session_state.owner.scheduler.generate_recurring_task_proposals(st.session_state.owner, docs)
         st.session_state.pending_proposals = [proposal.__dict__ for proposal in proposals]
 
     pending_proposals = st.session_state.get("pending_proposals", [])
     if pending_proposals:
-        st.write("Proposed recurring tasks:")
+        st.write("Heartfelt care suggestions:")
         for proposal in pending_proposals:
             st.markdown(f"**{proposal['pet_name']}** — {proposal['description']} at {proposal['proposed_time'].strftime('%Y-%m-%d %H:%M')}")
             st.write(proposal['reason'])
@@ -206,15 +307,15 @@ else:
             approved = [RecurringTaskProposal(**proposal) for proposal in pending_proposals]
             created_tasks = st.session_state.owner.scheduler.apply_recurring_proposals(st.session_state.owner, approved)
             fixes = st.session_state.owner.scheduler.fix_time_conflicts()
-            st.success(f"Added {len(created_tasks)} task(s) after approval.")
+            st.success(f"Added {len(created_tasks)} thoughtful task(s) to your care plan.")
             for message in fixes:
                 st.info(message)
             st.session_state.pending_proposals = []
 
     st.divider()
-    st.subheader("Build Schedule")
+    st.subheader("Build a Loving Schedule")
 
-    generate_schedule = st.button("Generate schedule", key="generate-schedule")
+    generate_schedule = st.button("Create my joyful schedule", key="generate-schedule")
     if generate_schedule:
         st.session_state.show_schedule = True
 
@@ -227,7 +328,7 @@ else:
             todays_tasks = scheduler.get_daily_tasks(today)
 
             if not todays_tasks:
-                st.info("No tasks scheduled for today. Add a task with today's date to see it here.")
+                st.info("No tasks scheduled for today yet — every pet deserves a thoughtful routine.")
             else:
                 sorted_tasks = scheduler.sort_tasks_by_time(todays_tasks)
                 conflict_warnings = scheduler.detect_time_conflicts()
@@ -240,7 +341,7 @@ else:
                         st.session_state.pending_conflict_fixes = scheduler.suggest_time_conflict_fixes(sorted_tasks)
 
                     if st.session_state.pending_conflict_fixes:
-                        st.info("Suggested fixes are shown below. Approve to update your schedule.")
+                        st.info("Suggested fixes are shown below to keep your care plan calm and consistent.")
                         for fix in st.session_state.pending_conflict_fixes:
                             st.write(
                                 f"- {fix['pet_name']} ({fix['description']}, priority {fix['priority']}) from {fix['old_time'].strftime('%H:%M')} to {fix['new_time'].strftime('%H:%M')}"
@@ -251,11 +352,11 @@ else:
                             st.session_state.pending_conflict_fixes = []
                             st.session_state.show_schedule = True
                             if applied_messages:
-                                st.success("Conflict fixes applied.")
+                                st.success("Conflict fixes applied — your pets are set for a smoother day.")
                                 for msg in applied_messages:
                                     st.info(msg)
                             else:
-                                st.warning("No fixes were applied. The conflict may have changed.")
+                                st.warning("No fixes were applied. The schedule may already be balanced.")
 
                             todays_tasks = scheduler.get_daily_tasks(today)
                             sorted_tasks = scheduler.sort_tasks_by_time(todays_tasks)
@@ -276,7 +377,7 @@ else:
                         "Completed": "✅" if task.completed else "❌",
                     })
 
-                st.subheader("Sorted Schedule")
+                st.subheader("Your Care Plan")
                 st.table(task_rows)
 
                 explanation = "Today’s schedule includes " + ", ".join(
@@ -297,7 +398,7 @@ else:
                 for note in validation.notes:
                     st.info(note)
 
-                st.subheader("Retrieved Reference Docs")
+                st.subheader("Why this plan matters")
                 if docs:
                     for doc in docs:
                         st.write(f"- {doc}")
